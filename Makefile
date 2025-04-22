@@ -1,8 +1,8 @@
 # Makefile for building count tool with various debug modes
 
 # Tools & flags
-AS      := as --32
-CC      := gcc -m32
+AS      := as --32 -g
+CC      := gcc -m32 -g
 LD      := ld -m elf_i386 -lc -dynamic-linker /lib/ld-linux.so.2
 BUILD   := build
 MODULES := $(basename $(wildcard *.s))
@@ -31,9 +31,9 @@ $(BUILD)/count-debug: | $(BUILD)
 	  $(AS) $$src -o $(BUILD)/$$obj; \
 	done
 	@echo "Compiling c/debug.c → object"
-	$(CC) -c c/debug.c -o $(BUILD)/debug.o
+	@$(CC) -c c/debug.c -o $(BUILD)/debug.o
 	@echo "Linking → $@"
-	$(LD) -o $@ $(BUILD)/*.o
+	@$(LD) -o $@ $(BUILD)/*.o
 
 # C: compile all c/*.c → build/count-c
 c: $(BUILD)/count-c
@@ -45,7 +45,7 @@ $(BUILD)/count-c: | $(BUILD)
 	  $(CC) -c $$src -o $(BUILD)/$$obj; \
 	done
 	@echo "Linking → $@"
-	$(CC) -o $@ $(BUILD)/*.o
+	@$(CC) -o $@ $(BUILD)/*.o
 
 # Debug‐per‐module: build count-debug-<module>
 debug-%: | $(BUILD)
