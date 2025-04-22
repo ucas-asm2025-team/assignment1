@@ -1,6 +1,4 @@
-**/count.o
-**/count.s
-**/count
+build/
 **.swp
 .tasks
 .DS_Store
