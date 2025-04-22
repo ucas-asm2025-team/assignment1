@@ -48,9 +48,9 @@ gcc -o build/count-debug build/*.o
 Compile all (c/*.c except c/\<module\>.c) and module.s to build/count-debug-\<module\>
 
 ```shell
-$ make debug-output
+$ make debug-foo
 as --32 foo.s -o build/foo.o
 gcc -m32 c/bar.c -o build/bar.o
 gcc -m32 c/debug.c -o build/debug.o
-gcc -o build/count-debug-output build/*.o
+gcc -o build/count-debug-foo build/*.o
 ```
