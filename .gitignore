@@ -1,3 +1,4 @@
-count*
+count.o
+count
 .tasks
 .DS_Store
