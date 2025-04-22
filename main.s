@@ -1,6 +1,6 @@
 .globl _start
 .extern isalpha, alpha, not_alpha, output, traverse
-.extern ch
+.extern ch, max_id, max_siz
 
 .section .text
 _start:
@@ -24,8 +24,19 @@ else_stmt:
 if_end:
     jmp while_cond
 while_end:
-    call    traverse # for debug
+    movl    $0, %esi
+    xorl    %esi, %esi
+for_loop:
+    cmpl    max_siz, %esi
+    jge     for_end
+    movl    max_id(,%esi,4), %eax
+    pushl   %eax
     call    output
+    addl    $4, %esp
+    incl    %esi
+    jmp     for_loop
+for_end:
+    call    traverse             # for debug
     movl    $1, %eax
     movl    $0, %ebx
     int     $0x80
