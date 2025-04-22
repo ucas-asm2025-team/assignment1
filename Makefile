@@ -1,35 +1,72 @@
-# Assembler and linker
-AS = as
-LD = ld
+# Makefile for building count tool with various debug modes
 
-# Flags
-ASFLAGS = --32
-LDFLAGS = -m elf_i386 -lc -dynamic-linker /lib/ld-linux.so.2
+# Tools & flags
+AS      := as --32
+CC      := gcc -m32
+LD      := ld -m elf_i386 -lc -dynamic-linker /lib/ld-linux.so.2
+BUILD   := build
+MODULES := $(basename $(wildcard *.s))
 
-# Directories
-BUILD_DIR = build
+.PHONY: all debug c clean debug-%
 
-# Find all assembly files in the current directory
-ASM_SRCS = $(wildcard *.s)
-OBJ_FILES = $(patsubst %.s,$(BUILD_DIR)/%.o,$(ASM_SRCS))
+# Default: build the normal count binary from all .s files
+all: $(BUILD)/count
 
-# Default target
-all: $(BUILD_DIR)/count
+$(BUILD)/count: | $(BUILD)
+	@echo "Assembling all .s → objects"
+	@for src in $(wildcard *.s); do \
+	  obj=$$(basename $$src .s).o; \
+	  $(AS) $$src -o $(BUILD)/$$obj; \
+	done
+	@echo "Linking → $@"
+	@$(LD) -o $@ $(BUILD)/*.o
 
-# Create build directory if it doesn't exist
-$(BUILD_DIR):
-	mkdir -p $(BUILD_DIR)
+# Debug‐all: replace debug.s with c/debug.c
+debug: $(BUILD)/count-debug
 
-# Compile .s files to .o files
-$(BUILD_DIR)/%.o: %.s | $(BUILD_DIR)
-	$(AS) $(ASFLAGS) $< -o $@
+$(BUILD)/count-debug: | $(BUILD)
+	@echo "Assembling all .s except debug.s → objects"
+	@for src in $(filter-out debug.s,$(wildcard *.s)); do \
+	  obj=$$(basename $$src .s).o; \
+	  $(AS) $$src -o $(BUILD)/$$obj; \
+	done
+	@echo "Compiling c/debug.c → object"
+	$(CC) -c c/debug.c -o $(BUILD)/debug.o
+	@echo "Linking → $@"
+	$(LD) -o $@ $(BUILD)/*.o
 
-# Link all object files to create the executable
-$(BUILD_DIR)/count: $(OBJ_FILES)
-	$(LD) $(LDFLAGS) -o $@ $^
+# C: compile all c/*.c → build/count-c
+c: $(BUILD)/count-c
 
-# Clean target
+$(BUILD)/count-c: | $(BUILD)
+	@echo "Compiling all c/*.c → objects"
+	@for src in $(wildcard c/*.c); do \
+	  obj=$$(basename $$src .c).o; \
+	  $(CC) -c $$src -o $(BUILD)/$$obj; \
+	done
+	@echo "Linking → $@"
+	$(CC) -o $@ $(BUILD)/*.o
+
+# Debug‐per‐module: build count-debug-<module>
+debug-%: | $(BUILD)
+	@module=$*; \
+	echo "Building debug for module $$module:"; \
+	for m in $(MODULES); do \
+	  if [ "$$m" = "$$module" ]; then \
+	    echo "  as --32 $$m.s → build/$$m.o"; \
+	    $(AS) $$m.s -o $(BUILD)/$$m.o; \
+	  else \
+	    echo "  gcc -m32 -c c/$$m.c → build/$$m.o"; \
+	    $(CC) -c c/$$m.c -o $(BUILD)/$$m.o; \
+	  fi; \
+	done; \
+	echo "Linking → $(BUILD)/count-debug-$$module"; \
+	$(CC) -o $(BUILD)/count-debug-$$module $(BUILD)/*.o
+
+# Ensure build directory exists
+$(BUILD):
+	@mkdir -p $(BUILD)
+
+# Clean up
 clean:
-	rm -rf $(BUILD_DIR)
-
-.PHONY: all clean
+	rm -rf $(BUILD)

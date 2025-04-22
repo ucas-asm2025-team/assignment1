@@ -1,5 +1,5 @@
 .globl _start
-.extern isalpha, alpha, not_alpha, output
+.extern isalpha, alpha, not_alpha, output, traverse
 .extern ch
 
 .section .text
@@ -24,6 +24,7 @@ else_stmt:
 if_end:
     jmp while_cond
 while_end:
+    call    traverse # for debug
     call    output
     movl    $1, %eax
     movl    $0, %ebx

@@ -1,8 +1,6 @@
-#include "constants.h"
+#include "variable.h"
 
 #include <stdio.h>
-extern int cnt[MAXN];
-extern int son[MAXN][CHARSET_SIZE];
 void traverse(int cur_id) {
     static char stack[MAXL], stack_tot;
     if (cnt[cur_id]) {

@@ -10,12 +10,12 @@
 son:     .fill MAXN*CHARSET_SIZE, 4, 0  # int son[MAXN][CHARSET_SIZE] = {0}
 cnt:     .fill MAXN, 4, 0               # int cnt[MAXN] = {0}
 father:  .fill MAXN, 4, 0               # int father[MAXN] = {0}
+max_id:  .fill MAXN, 4, 0               # int max_id[MAXN] = {0}
 content: .fill MAXN, 1, 0               # char content[MAXN] = {0}
-buffer:  .fill MAXL, 1, 0               # char buffer[MAXL] = {0}
 tot:     .long 0                        # int tot = 0
 max_cnt: .long 0                        # int max_cnt = 0
-max_id:  .long 0                        # int max_id = 0
+max_siz:  .long 0                       # int max_siz = 0
 ch:      .long 0                        # int ch = 0
 cur_id:  .long 0                        # int cur_id = 0
 
-.globl son, cnt, father, content, buffer, tot, max_cnt, max_id, ch, cur_id
+.globl son, cnt, father, content, tot, max_cnt, max_id, max_siz, ch, cur_id
