@@ -10,9 +10,8 @@ while_cond:
     cmpl    $-1, %eax
     je      while_end
 if_cond:
-    pushl   ch
+    movl    ch, %edi
     call    isalpha
-    addl    $4, %esp
     testl   %eax, %eax
     jz      else_stmt
 if_stmt:
@@ -29,14 +28,12 @@ while_end:
 for_loop:
     cmpl    max_siz, %esi
     jge     for_end
-    movl    max_id(,%esi,4), %eax
-    pushl   %eax
+    movl    max_id(,%esi,4), %edi
     call    output
-    addl    $4, %esp
     incl    %esi
     jmp     for_loop
 for_end:
-    call    traverse             # for debug
-    movl    $1, %eax
-    movl    $0, %ebx
-    int     $0x80
+    call    traverse
+    movl    $60, %eax
+    xorl    %edi, %edi
+    syscall

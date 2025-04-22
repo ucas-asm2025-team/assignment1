@@ -1,9 +1,9 @@
 # Makefile for building count tool with various debug modes
 
 # Tools & flags
-AS      := as --32 -g
-CC      := gcc -m32 -g
-LD      := ld -m elf_i386 -lc -dynamic-linker /lib/ld-linux.so.2
+AS      := as
+CC      := gcc
+LD      := ld -lc -dynamic-linker /lib64/ld-linux-x86-64.so.2
 BUILD   := build
 MODULES := $(basename $(wildcard *.s))
 
@@ -53,10 +53,10 @@ debug-%: | $(BUILD)
 	echo "Building debug for module $$module:"; \
 	for m in $(MODULES); do \
 	  if [ "$$m" = "$$module" ]; then \
-	    echo "  as --32 $$m.s → build/$$m.o"; \
+	    echo "  as $$m.s → build/$$m.o"; \
 	    $(AS) $$m.s -o $(BUILD)/$$m.o; \
 	  else \
-	    echo "  gcc -m32 -c c/$$m.c → build/$$m.o"; \
+	    echo "  gcc -c c/$$m.c → build/$$m.o"; \
 	    $(CC) -c c/$$m.c -o $(BUILD)/$$m.o; \
 	  fi; \
 	done; \
