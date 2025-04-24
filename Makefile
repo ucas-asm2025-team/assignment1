@@ -2,71 +2,121 @@
 
 # Tools & flags
 AS      := as -g
-CC      := gcc -g
-LD      := ld -lc -dynamic-linker /lib64/ld-linux-x86-64.so.2
+CC      := gcc -g -z execstack # fix the warning about executable stack
+LD      := ld -lc -dynamic-linker /lib64/ld-linux-x86-64.so.2 -z execstack
 BUILD   := build
+BUILD_ASM := $(BUILD)/asm
+BUILD_C := $(BUILD)/c
+TEST    := test
 MODULES := $(basename $(wildcard *.s))
 
-.PHONY: all debug c clean debug-%
+.PHONY: all debug c clean debug-% test
+
+# Object files from .s and c/debug.c
+S_SRCS := $(wildcard *.s)
+S_OBJS := $(patsubst %.s,$(BUILD_ASM)/%.o,$(S_SRCS))
+C_DEBUG_SRC := c/debug.c
+C_DEBUG_OBJ := $(BUILD_C)/debug.o
 
 # Default: build the normal count binary from all .s files
 all: $(BUILD)/count
 
-$(BUILD)/count: | $(BUILD)
-	@echo "Assembling all .s → objects"
-	@for src in $(wildcard *.s); do \
-	  obj=$$(basename $$src .s).o; \
-	  $(AS) $$src -o $(BUILD)/$$obj; \
-	done
-	@echo "Linking → $@"
-	@$(LD) -o $@ $(BUILD)/*.o
+$(BUILD)/count: $(S_OBJS)
+	@echo "Linking -> $@"
+	@$(LD) -o $@ $^
 
-# Debug‐all: replace debug.s with c/debug.c
+$(BUILD_ASM)/%.o: %.s | $(BUILD_ASM)
+	@echo "Assembling $< -> $@"
+	@$(AS) $< -o $@
+
+# Debug: replace debug.s with c/debug.c
+$(C_DEBUG_OBJ): $(C_DEBUG_SRC) | $(BUILD_C)
+	@echo "Compiling $< -> $@"
+	@$(CC) -c $< -o $@
+
+DEBUG_OBJS := $(filter-out $(BUILD_ASM)/debug.o,$(S_OBJS)) $(C_DEBUG_OBJ)
+
 debug: $(BUILD)/count-debug
 
-$(BUILD)/count-debug: | $(BUILD)
-	@echo "Assembling all .s except debug.s → objects"
-	@for src in $(filter-out debug.s,$(wildcard *.s)); do \
-	  obj=$$(basename $$src .s).o; \
-	  $(AS) $$src -o $(BUILD)/$$obj; \
-	done
-	@echo "Compiling c/debug.c → object"
-	@$(CC) -c c/debug.c -o $(BUILD)/debug.o
-	@echo "Linking → $@"
-	@$(LD) -o $@ $(BUILD)/*.o
+$(BUILD)/count-debug: $(DEBUG_OBJS)
+	@echo "Linking -> $@"
+	@$(LD) -o $@ $^
 
-# C: compile all c/*.c → build/count-c
+# C: compile all c/*.c -> build/count-c
+C_SRCS := $(wildcard c/*.c)
+C_OBJS := $(patsubst c/%.c,$(BUILD_C)/%.o,$(C_SRCS))
+
 c: $(BUILD)/count-c
 
-$(BUILD)/count-c: | $(BUILD)
-	@echo "Compiling all c/*.c → objects"
-	@for src in $(wildcard c/*.c); do \
-	  obj=$$(basename $$src .c).o; \
-	  $(CC) -c $$src -o $(BUILD)/$$obj; \
-	done
-	@echo "Linking → $@"
-	@$(CC) -o $@ $(BUILD)/*.o
+$(BUILD_C)/%.o: c/%.c | $(BUILD_C)
+	@echo "Compiling $< -> $@"
+	@$(CC) -c $< -o $@
 
-# Debug‐per‐module: build count-debug-<module>
-debug-%: | $(BUILD)
-	@module=$*; \
-	echo "Building debug for module $$module:"; \
+$(BUILD)/count-c: $(C_OBJS)
+	@echo "Linking -> $@"
+	@$(CC) -o $@ $^
+
+# Debug-per-module: build count-debug-<module>
+debug-%: %.s
+	$(MAKE) $(BUILD)/count-debug-$*
+
+$(BUILD)/count-debug-%: %.s | $(BUILD_ASM) $(BUILD_C)
+	@echo "Building debug for module $*"
+	@objs=""; \
 	for m in $(MODULES); do \
-	  if [ "$$m" = "$$module" ]; then \
-	    echo "  as $$m.s → build/$$m.o"; \
-	    $(AS) $$m.s -o $(BUILD)/$$m.o; \
+	  if [ "$$m" = "$*" ]; then \
+	    obj=$(BUILD_ASM)/$$m.o; \
+	    echo "  as $$m.s -o $$obj"; \
+	    $(AS) $$m.s -o $$obj; \
 	  else \
-	    echo "  gcc -c c/$$m.c → build/$$m.o"; \
-	    $(CC) -c c/$$m.c -o $(BUILD)/$$m.o; \
+	    obj=$(BUILD_C)/$$m.o; \
+	    echo "  gcc -c c/$$m.c -o $$obj"; \
+	    $(CC) -c c/$$m.c -o $$obj; \
 	  fi; \
+	  objs="$$objs $$obj"; \
 	done; \
-	echo "Linking → $(BUILD)/count-debug-$$module"; \
-	$(CC) -o $(BUILD)/count-debug-$$module $(BUILD)/*.o
+	echo "Linking -> $@"; \
+	$(CC) -o $@ $$objs
 
-# Ensure build directory exists
+# Ensure build directories exist
+$(BUILD_ASM):
+	@mkdir -p $@
+
+$(BUILD_C):
+	@mkdir -p $@
+
 $(BUILD):
-	@mkdir -p $(BUILD)
+	@mkdir -p $@
 
 # Clean up
 clean:
-	rm -rf $(BUILD)
+	rm -rf $(BUILD) $(TEST)
+
+# Test all modules
+test: c
+	@mkdir -p $(TEST)
+	@echo "Running automated tests for all modules ..."
+	@echo "Building debug versions for each module..."
+	@for module in $(filter-out main debug,$(MODULES)); do \
+		$(MAKE) $(BUILD)/count-debug-$$module; \
+	done
+	@echo "Running tests..."
+	@test_failed=0; \
+	for module in $(filter-out main debug,$(MODULES)); do \
+		printf "testing $$module... "; \
+		$(BUILD)/count-c < Makefile > $(TEST)/reference.txt; \
+		$(BUILD)/count-debug-$$module < Makefile > $(TEST)/debug-$$module.txt 2> $(TEST)/debug-$$module-err.txt; \
+		diff $(TEST)/reference.txt $(TEST)/debug-$$module.txt > /dev/null; \
+		if [ $$? -ne 0 ]; then echo "failed"; test_failed=1; else echo "OK"; fi; \
+	done; \
+	exit $$test_failed
+
+# Test specific module
+
+test-%: c debug-%
+	@mkdir -p $(TEST)
+	@echo "Running test for module $* ..."
+	@$(BUILD)/count-c < Makefile > $(TEST)/reference.txt
+	@$(BUILD)/count-debug-$* < Makefile > $(TEST)/debug-$*.txt 2> $(TEST)/debug-$*-err.txt
+	@diff $(TEST)/reference.txt $(TEST)/debug-$*.txt > /dev/null
+	@if [ $$? -ne 0 ]; then echo "failed"; exit 1; else echo "OK"; fi

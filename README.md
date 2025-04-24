@@ -4,8 +4,6 @@ Count words from `stdin`.
 
 ## build
 
----
-
 `make`:
 
 Compile all *.s to build/count
@@ -56,6 +54,12 @@ gcc -c c/bar.c -o build/bar.o
 gcc -c c/debug.c -o build/debug.o
 gcc -o build/count-debug-foo build/*.o
 ```
+
+## test
+
+`make test`: run test for all modules
+
+`make test-foo`: run test for module foo
 
 ## run
 
