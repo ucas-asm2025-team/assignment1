@@ -8,17 +8,19 @@ on:
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
 
     steps:
     - uses: actions/checkout@v4
-
     - name: make
       run: make
-
     - name: Test variable.s
       run: make test-variable
       
+  test:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
     - name: Test All
       run: make test
