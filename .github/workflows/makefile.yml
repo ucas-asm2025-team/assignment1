@@ -17,5 +17,17 @@ jobs:
     - name: make
       run: make
 
+    - name: Test variable.s
+      run: make test-variable
+
+    - name: Test alpha.s
+      run: make test-alpha
+
+    - name: Test not_alpha.s
+      run: make test-not_alpha
+
+    - name: Test output.s
+      run: make test-output
+      
     - name: Test All
       run: make test
