@@ -52,7 +52,7 @@ $(BUILD_C)/%.o: c/%.c | $(BUILD_C)
 	@echo "Compiling $< -> $@"
 	@$(CC) -c $< -o $@
 
-$(BUILD)/count-c: $(C_OBJS)
+$(BUILD)/count-c: $(C_OBJS) | $(BUILD_C)
 	@echo "Linking -> $@"
 	@$(CC) -o $@ $^
 
