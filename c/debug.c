@@ -1,7 +1,7 @@
 #include "variable.h"
 
 #include <stdio.h>
-void traverse(int cur_id) {
+static void traverse(int cur_id) {
     static char stack[MAXL], stack_tot;
     if (cnt[cur_id]) {
         stack[stack_tot] = 0;
@@ -15,3 +15,5 @@ void traverse(int cur_id) {
         }
     }
 }
+
+void debug() { traverse(0); }

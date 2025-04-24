@@ -1,5 +1,5 @@
 .globl _start
-.extern isalpha, alpha, not_alpha, output, traverse
+.extern isalpha, alpha, not_alpha, output, debug
 .extern ch, max_id, max_siz
 
 .section .text
@@ -33,7 +33,7 @@ for_loop:
     incl    %esi
     jmp     for_loop
 for_end:
-    call    traverse
+    call    debug
     movl    $60, %eax
     xorl    %edi, %edi
     syscall

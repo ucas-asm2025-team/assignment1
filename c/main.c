@@ -7,7 +7,7 @@
 void alpha();
 void not_alpha();
 void output(int id);
-void traverse();
+void debug();
 
 int main() {
     while ((ch = getchar()) != EOF) {
@@ -20,6 +20,6 @@ int main() {
     for (int i = 0; i < max_siz; i++) {
         output(max_id[i]);
     }
-    traverse();
+    debug();
     return 0;
 }

@@ -1,8 +1,8 @@
 # Makefile for building count tool with various debug modes
 
 # Tools & flags
-AS      := as
-CC      := gcc
+AS      := as -g
+CC      := gcc -g
 LD      := ld -lc -dynamic-linker /lib64/ld-linux-x86-64.so.2
 BUILD   := build
 MODULES := $(basename $(wildcard *.s))

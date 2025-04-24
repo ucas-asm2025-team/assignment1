@@ -1,5 +1,5 @@
-.globl traverse
+.globl debug
 
 .section .text
-traverse:
+debug:
     ret
