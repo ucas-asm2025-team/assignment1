@@ -24,9 +24,9 @@ ld -lc -dynamic-linker /lib64/ld-linux-x86-64.so.2 -o build/count build/*.o
 Compile all c/*.c to build/count-c
 
 ```shell
-gcc -m32 c/foo.c -o build/foo.o
-gcc -m32 c/bar.c -o build/bar.o
-gcc -m32 c/debug.c -o build/debug.o
+gcc -c c/foo.c -o build/foo.o
+gcc -c c/bar.c -o build/bar.o
+gcc -c c/debug.c -o build/debug.o
 gcc -o build/count-c build/*.o
 ```
 
@@ -39,7 +39,7 @@ Compile all (*.s except debug.s) and c/debug.c to build/count-debug
 ```shell
 as foo.s -o build/foo.o
 as bar.s -o build/bar.o
-gcc -m32 c/debug.c -o build/debug.o
+gcc -c c/debug.c -o build/debug.o
 gcc -o build/count-debug build/*.o
 ```
 
@@ -52,8 +52,8 @@ Compile all (c/*.c except c/\<module\>.c) and module.s to build/count-debug-\<mo
 ```shell
 $ make debug-foo
 as foo.s -o build/foo.o
-gcc -m32 c/bar.c -o build/bar.o
-gcc -m32 c/debug.c -o build/debug.o
+gcc -c c/bar.c -o build/bar.o
+gcc -c c/debug.c -o build/debug.o
 gcc -o build/count-debug-foo build/*.o
 ```
 
