@@ -1,5 +1,5 @@
 .globl _start
-.extern isalpha, alpha, not_alpha, output, debug
+.extern isalpha, alpha, not_alpha, output, debug, fflush
 .extern ch, max_id, max_siz
 
 .section .text
@@ -35,6 +35,8 @@ for_end:
 # if linked with c source debug.c, the debug() func will print all tree nodes
 # otherwise, debug() will do nothing, just serves as a place holder.
     call    debug
-    movl    $60, %eax
-    xorl    %edi, %edi
+    xor     %edi, %edi
+    call    fflush # call fflush(NULL)
+    movl    $60, %eax # syscall number for exit
+    xorl    %edi, %edi # exit code 0
     syscall
