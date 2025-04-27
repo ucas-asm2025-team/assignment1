@@ -4,7 +4,7 @@
 .type alpha, @function
 
 alpha:
-    pushl %ebp
+    push %ebp
     movl  %esp, %ebp
     
     # 计算son[cur_id][ch]的地址
