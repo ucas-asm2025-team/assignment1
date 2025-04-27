@@ -4,39 +4,55 @@
 .type not_alpha, @function
 
 not_alpha:
-    pushq %rbp
-    movq %rsp, %rbp
-    pushq %rbx                    # 保存%rbx寄存器
+    pushq   %rbp
+    movq    %rsp, %rbp
+    pushq   %rbx
+    pushq   %r12
+    pushq   %r13
 
-    # 通过GOT访问全局变量（64位PIC）
-    movq cur_id@GOTPCREL(%rip), %rax  # 获取cur_id的地址
-    movl (%rax), %eax            # 读取cur_id的值
-    testl %eax, %eax
-    jz .exit
+    # 访问全局变量（64位PIC）
+    movq    cur_id@GOTPCREL(%rip), %rax
+    movl    (%rax), %eax            # eax = cur_id
+    testl   %eax, %eax
+    jz      .exit
 
-    # 处理cnt数组
-    movq cnt@GOTPCREL(%rip), %rsi     # 获取cnt数组基地址
-    leaq (%rsi, %rax, 4), %rsi        # 计算cnt[cur_id]地址
-    incl (%rsi)                       # cnt[cur_id]++
+    # cnt[cur_id]++
+    movq    cnt@GOTPCREL(%rip), %rcx
+    movl    (%rcx, %rax, 4), %edx   # edx = cnt[cur_id]
+    incl    %edx
+    movl    %edx, (%rcx, %rax, 4)   # cnt[cur_id]++
 
-    # 处理max_cnt
-    movq max_cnt@GOTPCREL(%rip), %rcx # 获取max_cnt的地址
-    movl (%rcx), %edx                 # 读取max_cnt的值
-    cmpl %edx, (%rsi)
-    jle .no_update
+    # 处理max_cnt逻辑
+    movq    max_cnt@GOTPCREL(%rip), %r8
+    movl    (%r8), %r9d             # r9d = max_cnt
+    cmpl    %r9d, %edx
+    jle     .check_equal
 
-    movl (%rsi), %edx                 # 更新max_cnt
-    movl %edx, (%rcx)
-    movq max_id@GOTPCREL(%rip), %rcx  # 获取max_id的地址
-    movl %eax, (%rcx)
+    # 更新max_cnt并重置max_siz
+    movq    max_siz@GOTPCREL(%rip), %r10
+    movl    %edx, (%r8)             # max_cnt = cnt[cur_id]
+    movl    $0, (%r10)              # max_siz = 0
 
-.no_update:
-    movq cur_id@GOTPCREL(%rip), %rcx  # 获取cur_id的地址
-    movl $0, (%rcx)                   # cur_id = 0
+.check_equal:
+    cmpl    %r9d, %edx              # 比较cnt[cur_id]与原max_cnt
+    jl      .clear_id
+
+    # 将cur_id添加到max_id数组
+    movq    max_siz@GOTPCREL(%rip), %r11
+    movl    (%r11), %ebx            # ebx = max_siz
+    movq    max_id@GOTPCREL(%rip), %r12
+    movl    %eax, (%r12, %rbx, 4)   # max_id[max_siz] = cur_id
+    incl    (%r11)                  # max_siz++
+
+.clear_id:
+    # cur_id = 0
+    movq    cur_id@GOTPCREL(%rip), %r13
+    movl    $0, (%r13)
 
 .exit:
-    popq %rbx                        # 恢复%rbx
+    popq    %r13
+    popq    %r12
+    popq    %rbx
     leaveq
     retq
-    
     
