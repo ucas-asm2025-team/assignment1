@@ -16,7 +16,31 @@ jobs:
       run: make
     - name: Test variable.s
       run: make test-variable
+
+  test-alpha:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    - name: Test alpha()
+      run: make test-alpha
       
+  test-not_alpha:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    - name: Test not_alpha()
+      run: make test-not_alpha
+
+  test-output:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    - name: Test not_alpha()
+      run: make test-output
+
   test:
     runs-on: ubuntu-latest
     
@@ -24,3 +48,4 @@ jobs:
     - uses: actions/checkout@v4
     - name: Test All
       run: make test
+
