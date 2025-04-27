@@ -1,9 +1,14 @@
 # Makefile for building count tool with various debug modes
 
 # Tools & flags
-AS      := as -g
-CC      := gcc -g -z execstack # fix the warning about executable stack
-LD      := ld -lc -dynamic-linker /lib64/ld-linux-x86-64.so.2 -z execstack
+# AS      := as -g
+# CC      := gcc -g -z execstack # fix the warning about executable stack
+# LD      := ld -lc -dynamic-linker /lib64/ld-linux-x86-64.so.2 -z execstack
+
+AS      := as -g --32
+CC      := gcc -g -m32 -z execstack # fix the warning about executable stack
+LD      := ld -melf_i386 -lc -dynamic-linker /lib/ld-linux.so.2 -z execstack
+
 BUILD   := build
 BUILD_ASM := $(BUILD)/asm
 BUILD_C := $(BUILD)/c

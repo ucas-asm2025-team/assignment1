@@ -1,10 +1,15 @@
+.code32
 .globl alpha
+.extern ch, cur_id, tot, father, content, son  # 声明外部符号
+
+# 定义CHARSET_SIZE常量
+.equ CHARSET_SIZE, 128
 
 .section .text
 .type alpha, @function
 
 alpha:
-    pushl %ebp
+    push %ebp
     movl  %esp, %ebp
     
     # 计算son[cur_id][ch]的地址
