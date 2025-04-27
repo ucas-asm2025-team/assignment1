@@ -93,7 +93,7 @@ clean:
 	rm -rf $(BUILD) $(TEST)
 
 # Test all modules
-test: c
+test: c debug
 	@mkdir -p $(TEST)
 	@echo "Running automated tests for all modules ..."
 	@echo "Building debug versions for each module..."
@@ -102,12 +102,15 @@ test: c
 	done
 	@echo "Running tests..."
 	@test_failed=0; \
-	for module in $(filter-out main debug,$(MODULES)); do \
+	cp $(BUILD)/count-debug $(BUILD)/count-debug-all; \
+	$(BUILD)/count-c < Makefile > $(TEST)/reference.txt; \
+	for module in $(filter-out main debug,$(MODULES)) all; do \
 		printf "testing $$module... "; \
-		$(BUILD)/count-c < Makefile > $(TEST)/reference.txt; \
 		$(BUILD)/count-debug-$$module < Makefile > $(TEST)/debug-$$module.txt 2> $(TEST)/debug-$$module-err.txt; \
-		diff $(TEST)/reference.txt $(TEST)/debug-$$module.txt > /dev/null; \
-		if [ $$? -ne 0 ]; then echo "failed"; test_failed=1; else echo "OK"; fi; \
+		if [ $$? -ne 0 ]; then echo "runtime error"; test_failed=1; else \
+			diff $(TEST)/reference.txt $(TEST)/debug-$$module.txt > $(TEST)/$$module-diff.txt; \
+			if [ $$? -ne 0 ]; then echo "wrong answer, dumped details to $(TEST)/$$module-diff.txt"; test_failed=1; else echo "OK"; fi; \
+		fi; \
 	done; \
 	exit $$test_failed
 
