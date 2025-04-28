@@ -164,22 +164,22 @@ cur_id:  .long 0                        # int cur_id = 0
     \begin{itemize}
         \item \textbf{循环读取字符}：调用 \verb|getchar| 读取输入，遇 \verb|EOF| 结束循环
         \begin{lstlisting}[language={[x86masm]Assembler}]
-while_cond:
+.while_cond:
     call    getchar
     movl    %eax, ch(%rip) # let ch = getchar()
     cmpl    $-1, %eax
-    je      while_end      # jump ch == EOF ? while_end : if_cond
+    je      .while_end      # jump ch == EOF ? while_end : if_cond
         \end{lstlisting}
         
         \item \textbf{字符分类处理}：
         \begin{itemize}
             \item \textbf{判断是否为字母}：
             \begin{lstlisting}[language={[x86masm]Assembler}]
-if_cond:
+.if_cond:
     movl    ch(%rip), %edi
     call    isalpha
     testl   %eax, %eax
-    jz      else_stmt      # jump isalpha(ch) ? if_stmt : else_stmt
+    jz      .else_stmt      # jump isalpha(ch) ? if_stmt : else_stmt
             \end{lstlisting}
             
             \item \textbf{字母}：调用 \verb|alpha| 处理字母字符，构建单词
@@ -192,9 +192,9 @@ if_cond:
         \item \textbf{遍历高频词数组}：按 \verb|max_siz| 遍历 \verb|max_id| 数组，调用 \verb|output| 逐项输出高频词
         \begin{lstlisting}[language={[x86masm]Assembler}]
     movq    $0, %rsi # let counter %rsi = 0
-for_loop:
+.for_loop:
     cmpl    max_siz(%rip), %esi
-    jge     for_end # if %esi >= max_siz then break
+    jge     .for_end # if %esi >= max_siz then break
     leaq    max_id(%rip), %rdi # let %rdi = &max_id
     movl    (%rdi,%rsi,4), %edi # let %edi = max_id[%esi]
     movslq  %edi, %rdi # sign extend %edi to %rdi
@@ -202,7 +202,7 @@ for_loop:
     call    output      # call output(max_id[%esi])
     pop     %rsi        # 恢复循环计数器
     inc     %rsi        # %esi++
-    jmp     for_loop
+    jmp     .for_loop
         \end{lstlisting}
     \end{itemize}
     
