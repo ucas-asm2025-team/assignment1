@@ -1,8 +1,8 @@
-#define MAXN         1000  // max quantity of different words
+#define MAXN         2500  // max tree size
 #define MAXL         100   // max length of a word
 #define CHARSET_SIZE 128
 
-.equ MAXN, 1000
+.equ MAXN, 2500
 .equ CHARSET_SIZE, 128
 .equ MAXL, 1000
 
@@ -18,4 +18,4 @@ max_siz: .long 0                        # int max_siz = 0
 ch:      .long 0                        # int ch = 0
 cur_id:  .long 0                        # int cur_id = 0
 
-.globl son, cnt, father, content, tot, max_cnt, max_id, max_siz, ch, cur_id
+.globl son, cnt, father, content, tot, max_cnt, max_id, max_siz, ch, cur_id, MAXN, CHARSET_SIZE, MAXL

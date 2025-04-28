@@ -2,6 +2,8 @@
 
 Count words from `stdin`.
 
+Data range: different words <= 200, word length <= 12.
+
 ## build
 
 `make`:

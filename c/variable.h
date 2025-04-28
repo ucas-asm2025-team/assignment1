@@ -1,4 +1,5 @@
-#define MAXN         1000  // max quantity of different words
+// data range: different words <= 200, word length <= 12
+#define MAXN         2500  // max tree size
 #define MAXL         100   // max length of a word
 #define CHARSET_SIZE 128
 extern int son[MAXN][CHARSET_SIZE];
