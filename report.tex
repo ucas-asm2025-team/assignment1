@@ -62,7 +62,6 @@
         \item 使用字典树存储单词，每个节点表示一个字符
         \item 使用数组实现树结构，避免指针操作的复杂性
         \item 全局数据存储在variable.s中，主要包括以下数组：
-        
         \begin{lstlisting}[language=C]
 son[MAXN][CHARSET_SIZE]  // 存储当前节点的子节点，son[i][ch]表示节点i的字符ch子节点的ID
 cnt[MAXN]                // 记录每个单词出现的次数
@@ -73,7 +72,7 @@ max_id[MAXN]             // 存储出现次数最多的单词的节点ID
         
         \item 关键常量定义：
         \begin{lstlisting}[language=C]
-#define MAXN         1000  // 不同单词的最大数量
+#define MAXN         2500  // 字典树的最大节点数
 #define MAXL         100   // 单词的最大长度
 #define CHARSET_SIZE 128   // 字符集大小（ASCII）
         \end{lstlisting}
@@ -120,7 +119,7 @@ void output(int id); // 从叶子节点回溯到根节点，输出单词
     \item \textbf{数据逻辑分离}：利用variable.s文件集中管理全局数据结构，其他文件通过.extern引用
     \item \textbf{数据结构选择}：
     \begin{itemize}
-        \item 采用字典树（Trie树）实现单词存储和频率统计
+        \item 采用字典树（Trie树）实现单词存储和频率统计，时间复杂度、空间复杂度均为 \(O(n)\)，其中 \(n\) 为文本长度
         \item 使用线性数组实现树结构，避免复杂的指针操作
         \item variable.s中定义的核心数据结构：
         \begin{lstlisting}[language={[x86masm]Assembler}]
@@ -142,7 +141,7 @@ cur_id:  .long 0                        # int cur_id = 0
         \item 使用位置无关代码（PIC）技术访问全局变量
         \item 充分利用64位寄存器和地址计算指令
         \item 严格遵循函数调用约定（保存被调用者保存寄存器）
-        \item 合理利用C标准库函数，如getchar()、puts()等
+        \item 合理利用C标准库函数，如 \verb|getchar()|、\verb|puts()| 等
     \end{itemize}
 \end{itemize}
 
@@ -163,7 +162,7 @@ cur_id:  .long 0                        # int cur_id = 0
     
     \item \textbf{主循环处理输入}
     \begin{itemize}
-        \item \textbf{循环读取字符}：调用\verb|getchar|读取输入，遇\verb|EOF|结束循环
+        \item \textbf{循环读取字符}：调用 \verb|getchar| 读取输入，遇 \verb|EOF| 结束循环
         \begin{lstlisting}[language={[x86masm]Assembler}]
 while_cond:
     call    getchar
@@ -183,14 +182,14 @@ if_cond:
     jz      else_stmt      # jump isalpha(ch) ? if_stmt : else_stmt
             \end{lstlisting}
             
-            \item \textbf{字母}：调用\verb|alpha|处理字母字符，构建单词
-            \item \textbf{非字母}：调用\verb|not_alpha|处理非字母字符，用于分割单词
+            \item \textbf{字母}：调用 \verb|alpha| 处理字母字符，构建单词
+            \item \textbf{非字母}：调用 \verb|not_alpha| 处理非字母字符，用于分割单词
         \end{itemize}
     \end{itemize}
     
     \item \textbf{结果输出阶段}
     \begin{itemize}
-        \item \textbf{遍历高频词数组}：按\verb|max_siz|遍历\verb|max_id|数组，调用\verb|output|逐项输出高频词
+        \item \textbf{遍历高频词数组}：按 \verb|max_siz| 遍历 \verb|max_id| 数组，调用 \verb|output| 逐项输出高频词
         \begin{lstlisting}[language={[x86masm]Assembler}]
     movq    $0, %rsi # let counter %rsi = 0
 for_loop:
@@ -209,8 +208,8 @@ for_loop:
     
     \item \textbf{收尾与调试}
     \begin{itemize}
-        \item \textbf{调试}：调用\verb|debug|打印内部数据结构（如树节点）
-        \item \textbf{刷新输出}：\verb|fflush(NULL)|强制写入流，确保缓冲区内容被输出
+        \item \textbf{调试}：调用 \verb|debug| 打印内部数据结构（如树节点）
+        \item \textbf{刷新输出}：\verb|fflush(NULL)| 强制写入流，确保缓冲区内容被输出
         \begin{lstlisting}[language={[x86masm]Assembler}]
     xor     %edi, %edi
     call    fflush       # call fflush(NULL)
@@ -230,7 +229,7 @@ for_loop:
     \item \textbf{函数入口准备}
     \begin{itemize}
         \item \textbf{栈帧建立}：\verb|pushq %rbp| + \verb|movq %rsp, %rbp| 创建新栈帧
-        \item \textbf{外部依赖}：通过\verb|.extern|声明使用外部全局变量（树结构核心数据）
+        \item \textbf{外部依赖}：通过 \verb|.extern| 声明使用外部全局变量（树结构核心数据）
     \end{itemize}
     
     \item \textbf{子节点地址计算}
@@ -243,7 +242,7 @@ leaq  son(%rip), %rdx         # 获取son数组基址
 leaq  (%rdx,%rax,4), %rsi     # 最终地址：&son[cur_id][ch]
     \end{lstlisting}
     \begin{itemize}
-        \item 核心目的是定位son[cur\_id][ch]在内存中的地址
+        \item 核心目的是定位 \verb|son[cur_id][ch]| 在内存中的地址
     \end{itemize}
     
     \item \textbf{子节点存在性检查}
@@ -289,13 +288,13 @@ movl  %eax, cur_id(%rip)      # 更新cur_id为子节点
     
     \item \textbf{有效性检查}（行5-9）
     \begin{itemize}
-        \item 检查 cur\_id 是否为 0（空状态）
+        \item 检查 \verb |cur_id| 是否为 0（空状态）
         \item 若为 0 直接跳转到退出流程，避免无效节点操作
     \end{itemize}
     
     \item \textbf{词频统计}（行10-14）
     \begin{itemize}
-        \item 从 cnt 数组中读取 cur\_id 对应的词频值
+        \item 从 \verb|cnt| 数组中读取 \verb |cur_id| 对应的词频值
         \item 将词频值加 1 后写回内存，完成计数器更新
     \end{itemize}
     
@@ -303,19 +302,19 @@ movl  %eax, cur_id(%rip)      # 更新cur_id为子节点
     \begin{itemize}
         \item 分支1（新最大值）：
         \begin{itemize}
-            \item 若当前词频超过 max\_cnt，更新 max\_cnt 为新值
-            \item 清空 max\_siz（重置极值数组索引）
+            \item 若当前词频超过 \verb|max_cnt|，更新 \verb|max_cnt| 为新值
+            \item 清空 \verb|max_siz|（重置极值数组索引）
         \end{itemize}
         \item 分支2（等于当前最大值）：
         \begin{itemize}
-            \item 将 cur\_id 写入 max\_id 数组末尾
-            \item 递增 max\_siz 记录新的极值数量
+            \item 将 \verb|cur_id| 写入 \verb|max_id| 数组末尾
+            \item 递增 \verb|max_siz| 记录新的极值数量
         \end{itemize}
     \end{itemize}
     
     \item \textbf{状态重置}（行23-25）
     \begin{itemize}
-        \item 将 cur\_id 重置为 0，准备接收下一个单词的插入操作
+        \item 将 \verb|cur_id| 重置为 0，准备接收下一个单词的插入操作
     \end{itemize}
     
     \item \textbf{退出清理}（行26-29）
@@ -369,7 +368,7 @@ movl  %eax, cur_id(%rip)      # 更新cur_id为子节点
     
     \item \textbf{字符反向收集}
     \begin{itemize}
-        \item 循环条件：当 id≠0 时持续遍历（father 数组实现树结构回溯）
+        \item 循环条件：当 \verb|id| \(\neq 0\) 时持续遍历（\verb|father| 数组实现树结构回溯）
         \item 操作流程：
         \begin{lstlisting}[language={[x86masm]Assembler}]
 .Lcollect:
@@ -424,9 +423,9 @@ movl  %eax, cur_id(%rip)      # 更新cur_id为子节点
     
     \item \textbf{终止符与输出}
     \begin{itemize}
-        \item 安全设计：在 output\_buffer[cnt*2] 写入 \verb|\0|（确保缓冲区溢出时仍能终止）
-        \item 栈对齐优化：调用 puts 前调整栈指针保证16字节对齐
-        \item 输出地址：将反转后的字符串起始地址（output\_buffer + cnt）传给 puts
+        \item 安全设计：在 \verb|output_buffer[cnt*2]| 写入 \verb|\0|（确保缓冲区溢出时仍能终止）
+        \item 栈对齐优化：调用 \verb|puts| 前调整栈指针保证16字节对齐
+        \item 输出地址：将反转后的字符串起始地址（\verb|output_buffer + cnt|）传给 \verb|puts|
         \begin{lstlisting}[language={[x86masm]Assembler}]
 .Lafter_reverse:
         movl    -4(%rbp), %eax
@@ -453,7 +452,7 @@ movl  %eax, cur_id(%rip)      # 更新cur_id为子节点
 \section{编程调试心得体会}
 
 \begin{itemize}
-    \item C语言的代码在对单模块的调试中发挥了重要作用。通过\verb|make debug-(模块名)|命令可以将C语言编写的该模块替换为相应的汇编.s文件，在其他函数仍是C语言的情况下进行测试，实现单模块的调试。这是一种效率较高的debug方式。
+    \item C语言的代码在对单模块的调试中发挥了重要作用。通过 \verb|make debug-(模块名)| 命令可以将C语言编写的该模块替换为相应的汇编.s文件，在其他函数仍是C语言的情况下进行测试，实现单模块的调试。这是一种效率较高的debug方式。
     
     \item 各个成员在代码编写时都遇到了"位数"的问题，实验目标是实现64位的程序，makefile的编译指令中也是64位的编译指令。但各组员编写的时候都写成了32位程序，导致测试的时候出现错误。因此，在编写汇编代码时，需要注意指令的位数，以及数据类型是否正确。
     
@@ -465,12 +464,12 @@ movl  %eax, cur_id(%rip)      # 更新cur_id为子节点
     syscall
     \end{lstlisting}
 
-    这段代码使用了直接的系统调用来终止程序，而没有通过C运行时库的exit()函数。问题在于，直接使用syscall退出程序会绕过C运行时的清理过程，导致标准输出流的缓冲区没有被刷新，输出内容仍然滞留在缓冲区中。
+    这段代码使用了直接的系统调用来终止程序，而没有通过C运行时库的 \verb|exit()| 函数。问题在于，直接使用syscall退出程序会绕过C运行时的清理过程，导致标准输出流的缓冲区没有被刷新，输出内容仍然滞留在缓冲区中。
 
     我们通过两种方法解决了这个问题：
     \begin{enumerate}
-        \item 在syscall之前调用\verb|fflush(NULL)|手动刷新所有输出缓冲区
-        \item 替换直接系统调用，改为调用C库的\verb|exit()|函数，让它来处理程序终止时的缓冲区刷新
+        \item 在syscall之前调用 \verb|fflush(NULL)| 手动刷新所有输出缓冲区
+        \item 替换直接系统调用，改为调用C库的 \verb|exit()| 函数，让它来处理程序终止时的缓冲区刷新
     \end{enumerate}
 
     这个经验让我们深刻理解了汇编代码与C运行时环境之间的交互，特别是关于输出缓冲机制和程序正确终止的重要性。
